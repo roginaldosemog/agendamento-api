@@ -1,19 +1,26 @@
-const express = require('express');
+const express = require("express");
+const crypto = require("crypto");
+
+const connection = require("./database/connection");
 
 const routes = express.Router();
 
-routes.post('/doctors', (request, response) => {
-    const body = request.body;
-    const query = request.query;
-    const params = request.params;
+routes.get("/doctors", async (request, response) => {
+  const doctors = await connection("doctors").select("*");
 
-    console.log(body);
-    console.log(query);
-    console.log(params);
+  return response.json(doctors);
+});
 
-    return response.json({
-        status_code: 200,
-    });
+routes.post("/doctors", async (request, response) => {
+  const { name } = request.body;
+  const id = crypto.randomBytes(4).toString("HEX");
+
+  await connection("doctors").insert({
+    id,
+    name,
+  });
+
+  return response.json({ id });
 });
 
 module.exports = routes;
